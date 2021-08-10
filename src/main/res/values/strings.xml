@@ -1,0 +1,7 @@
+<resources>
+    <string name="Name">Casdoor</string>
+    <string name="Hello">Hello World</string>
+    <string name="casdoor_input_token">Input the token</string>
+    <string name="casdoor_btn_submit">submit</string>
+    <string name="user_token">user_token</string>
+</resources>
