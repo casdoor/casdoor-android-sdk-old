@@ -29,7 +29,7 @@ Global admin login:
 
 ## Get Started
 
-Before using casdoor-andorid-sdk, you should make casdoor started: [Install Guide | Casdoor](https://casdoor.org/docs/basic/installation), then, you can quickly implement a casdoor based login page in your own app with the following methods:
+Before using casdoor-andorid-sdk, you should make casdoor started: [Install Guide | Casdoor](https://casdoor.org/docs/basic/server-installation), then, you can quickly implement a casdoor based login page in your own app with the following methods:
 
 ### Login state related
 
