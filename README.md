@@ -1,234 +1,49 @@
-# Casdoor Android SDK
+# casdoor-android-sdk-old
+
+[![Status](https://img.shields.io/badge/status-deprecated-red.svg)](https://github.com/casdoor/casdoor-android-sdk)
+[![Replaced by](https://img.shields.io/badge/replaced%20by-casdoor--android--sdk-blue.svg?logo=android)](https://github.com/casdoor/casdoor-android-sdk)
+[![Maven Central](https://img.shields.io/maven-central/v/org.casbin/casdoor-android-sdk.svg?label=new%20SDK)](https://central.sonatype.com/artifact/org.casbin/casdoor-android-sdk)
+[![License](https://img.shields.io/github/license/casdoor/casdoor-android-sdk-old.svg)](LICENSE)
+[![Discord](https://img.shields.io/discord/1022748306096537660?logo=discord&label=discord&color=5865F2)](https://discord.gg/5rPsrAzK7S)
 
 > [!WARNING]
-> **This repository is deprecated and no longer maintained.** Please use the new SDK instead: https://github.com/casdoor/casdoor-android-sdk
->
-> - It is published to Maven Central as `org.casbin:casdoor-android-sdk`, see its README for usage from both Kotlin and Java.
-> - It signs in with PKCE, so the app does not need a client secret. This old SDK puts the client secret and JWT secret into the app, where anyone can extract them from the APK.
->
-> Example app: https://github.com/casdoor/casdoor-android-example
+> This is the first, Java version of the [Casdoor](https://casdoor.ai/) Android SDK, written in 2021. It is
+> **deprecated and no longer maintained**. Please use [casdoor-android-sdk](https://github.com/casdoor/casdoor-android-sdk)
+> instead.
 
-[Casdoor](https://casdoor.org/docs/overview) is a UI-first centralized authentication / [Single-Sign-On (SSO)](https://en.wikipedia.org/wiki/Single_sign-on) platform based on OAuth 2.0 / OIDC.
+## Why it is deprecated
 
-Casdoor serves both the web UI and the login requests from the application users.
+- It puts the client secret and the JWT secret of the Casdoor application into the app. Anyone can extract them from the
+  APK, and with the client secret they can call the Casdoor API as your application, for example to list all users of
+  the organization.
+- It was never published to a Maven repository, and it uses WebView APIs that have been removed from recent Android
+  versions.
 
-## Casdoor features:
+The new SDK signs users in with OAuth 2.0 and [PKCE](https://datatracker.ietf.org/doc/html/rfc7636), so the app needs no
+secret. It is published to Maven Central, is tested in CI, and can be called from both Kotlin and Java.
 
-1. Front-end and back-end separate architecture, developed by Golang, Casdoor supports high concurrency, provides web-based managing UI and supports multiple languages(Chinese, English).
-2. Casdoor supports Github, Google, QQ, WeChat third-party applications login, and support the extension of third-party login with plugins.
-3. With [Casbin](https://casbin.org/) based authorization management, Casdoor supports ACL, RBAC, ABAC, RESTful accessing control models.
-4. Phone verification code, email verification code and forget password features.
-5. Accessing logs auditing and recording.
-6. Alibaba Cloud, Tencent Cloud, Qiniu Cloud image CDN cloud storage.
-7. Customizable register, login, and forget password pages.
-8. Casdoor supports integration with existing systems using db sync method, users can transition to Casdoor smoothly.
-9. Casdoor supports mainstream databases: MySQL, PostgreSQL, SQL Server etc, and support the extension of new database with plugins.
+## Migrate to the new SDK
 
-## Casdoor Online demo
+Replace this library with:
 
-Here is an online demo deployed by Casbin.
-
-- [Casdoor official demo](https://door.casbin.com/)
-
-Global admin login:
-
-- Username: `admin`
-- Password: `123`
-
-## Get Started
-
-Before using casdoor-andorid-sdk, you should make casdoor started: [Install Guide | Casdoor](https://casdoor.org/docs/basic/server-installation), then, you can quickly implement a casdoor based login page in your own app with the following methods:
-
-### Login state related
-
-#### `boolean CasdoorAuth.hasLoggedIn(FragmentActivity activity)`
-
-This method could be used to judge whether the user has logged in through casdoor sdk. You would get  `true` when he(she) has logged in. Cause based on the `SharedPreference`, you could just deliver the activity which the caller belong to. Only when the user has logged in, the casdoor sdk is likely to successfullty get info of users and do requests those need authority.
-
-To achieve "Display different content as the login state changes" effect, you could refer to the below code fragment in onCreateView method in android fragment:
-
-```java
-if (getActivity() != null) {
-    FragmentManager fragmentManager = getParentFragmentManager();
-    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-    if (CasdoorAuth.hasLoggedIn(getActivity())) {
-        UserInfoFragment userInfoFragment = new UserInfoFragment(getActivity());
-        fragmentTransaction.replace(R.id.minePage, userInfoFragment);
-    } else {
-        UserLoginFragment userLoginFragment = new UserLoginFragment(getActivity());
-        fragmentTransaction.replace(R.id.minePage, userLoginFragment);
-    }
-    fragmentTransaction.commit();
+```groovy
+dependencies {
+    implementation 'org.casbin:casdoor-android-sdk:0.1.0'
 }
 ```
 
-> UserInfoFragment is a fragment that could display some user information or entrance of some operations that needs user rights. UserLoginFragment is a fragment that provides the entrance for casdoor sdk to complete a series of login steps.
+| This SDK                                    | casdoor-android-sdk                                         |
+|---------------------------------------------|-------------------------------------------------------------|
+| `ENDPOINT`, `CLIENTID`, `ORGANIZATIONNAME`  | `endpoint`, `clientID`, `organizationName` of `CasdoorConfig` |
+| `REDIRECTURI` (hard-coded in the library)   | `redirectUri` of `CasdoorConfig`, such as `casdoor://callback` |
+| `CLIENTSECRET`, `JWTSECRET`                 | Not needed, remove them from your app                       |
+| `CasdoorLoginActivity`                      | Load `casdoor.getSignInUrl()` in your own WebView or browser |
+| Token and user saved in `SharedPreferences` | `requestOauthAccessToken(code)` and `getUserInfo(accessToken)` return them to you |
+| `CasdoorAuth.logout()`                      | `casdoor.logout(accessToken)`                               |
 
-#### `void CasdoorAuth.logout(FragmentActivity activity)`
+See the [README of casdoor-android-sdk](https://github.com/casdoor/casdoor-android-sdk#readme) for the full usage,
+including Java, and [casdoor-android-example](https://github.com/casdoor/casdoor-android-example) for a demo app.
 
-This method could be used to logout. (just as the method name says).
+## License
 
-### User information related
-
-To get user's basic information, you should firstly create the `CasdoorLoginActivity` provided by casdoor android sdk, after starting the activity, the casdoor would take over the app and complete the rest part of login procedure. After the user successfully login, the sdk would be available to use all kinds of method to get user's information. In the seem time, casdoor sdk also provides `SetUser` & `SetUsers` method to get users' basic public informations (private info is masked)
-
-#### `class CasdoorLoginActivity`
-
-All procedure of login through casdoor is based on the `CasdoorLoginActivity`, once the user successfully login, the access_token would be write in memory which would be saved unless the app data is cleared or logout forwardly even if the app is closed.
-
-It should be noticed that before you start the `CasdoorLoginActivity`, you need to setup config by `putExtra` method through intent. To make this easier, casdoor sdk provides some public static final String in `class CasdoorConfig`. The extra Strings you need to put is:
-
-- `Endpoint`: equal to `CasdoorConfig.ENDPOINT`, Casdoor Server Url, such as `http://localhost:8000`, `https://door.casbin.com`, etc.
-- `ClientID`: equal to `CasdoorConfig.CLIENTID`,  Application's client_id in casdoor, you could find it in `Applications` - `Edit Applications` - `Client ID`. The `ClientID` should look like this: `0ba528121ea87b3eb54d`.
-- `ClientSecret`: equal to `CasdoorConfig.CLIENTSECRET`, which as seems as the `ClientID`. The `ClientSecret` should look like this: `04f4ca22101529a3503d5a653a877b4e8403edf0`.
-- `JWTSecret`: equal to `CasdoorConfig.JWTSECRET`, which is used to parse token to claims.  
-- `OrganizationName`: equal to `CasdoorConfig.ORGANIZATIONNAME`, the organization's name.
-
-You could refer to the below code fragment to start `CasdoorLoginActivity` when you need to:
-
-```java
-Intent intent = new Intent();
-intent.setClass(activity, CasdoorLoginActivity.class);
-// Before starting activity, you should init config
-intent.putExtra(CasdoorConfig.ENDPOINT, "https://door.casbin.com");
-intent.putExtra(CasdoorConfig.CLIENTID, "0ba528121ea87b3eb54d");
-intent.putExtra(CasdoorConfig.CLIENTSECRET, "04f4ca22101529a3503d5a653a877b4e8403edf0");
-intent.putExtra(CasdoorConfig.JWTSECRET, "04f4ca22101529a3503d5a653a877b4e8403edf004f4ca22101529a3503d5a653a877b4e8403edf004f4ca22101529a3503d5a653a877b4e8403edf0");
-intent.putExtra(CasdoorConfig.ORGANIZATIONNAME, "casbin-oa");
-startActivity(intent);
-```
-
-#### `String CasdoorUserToken.GetUserToken(FragmentActivity activity)`
-
-After logging in, you could get the user token string through method `GetUserToken`, it should be noticed that this user token is `JSON Web Token (JWT)`, thus, it is available to get user's information without doing any extra request.
-
-> JWT is a means of transmitting information between two parties in a compact, verifiable form.
->
-> The bits of information encoded in the body of a JWT are called `claims`. The expanded form of the JWT is in a JSON format, so each `claim` is a key in the JSON object.
->
-> JWTs can be cryptographically signed (making it a [JWS](https://tools.ietf.org/html/rfc7515)) or encrypted (making it a [JWE](https://tools.ietf.org/html/rfc7516)).
->
-> This adds a powerful layer of verifiability to the user of JWTs. The receiver has a high degree of confidence that the JWT has not been tampered with by verifying the signature, for instance.
->
-> The compact representation of a signed JWT is a string that has three parts, each separated by a `.`:
->
-> ```
-> eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJKb2UifQ.ipevRNuRP6HflG8cFKnmUPtypruRC4fb1DWtoLL62SY
-> ```
->
-> Each part is [Base64URL](https://en.wikipedia.org/wiki/Base64)-encoded. The first part is the header, which at a minimum needs to specify the algorithm used to sign the JWT. The second part is the body. This part has all the claims of this JWT encoded in it. The final part is the signature. It's computed by passing a combination of the header and body through the algorithm specified in the header.
->
-> If you pass the first two parts through a base 64 url decoder, you'll get the following (formatting added for clarity):
->
-> ```json
-> header {
->   "alg": "HS256"
-> }
-> body {
->   "sub": "Joe"
-> }
-> ```
->
-> In this case, the information we have is that the HMAC using SHA-256 algorithm was used to sign the JWT. And, the body has a single claim, `sub` with value `Joe`. In casdoor sdk, the claims struct is:
->
-> ```java
-> public class CasdoorClaims {
->     String Organization;
->     String UserName;
->     String Type;
-> 
->     String Name;
->     String Avatar;
->     String Email;
->     String Phone;
-> 
->     String Affiliation;
->     String Tag;
->     String Language;
->     int Score;
-> 
->     boolean IsAdmin;
->     String Aud;
->     int Exp;
->     int Iat;
->     String Iss;
->     int Nbf;
-> }	
-> ```
->
-> There are a number of standard claims, called [Registered Claims](https://tools.ietf.org/html/rfc7519#section-4.1), in the specification and `sub` (for subject) is one of them.
->
-> To compute the signature, you need a secret key to sign it. Which is `CasdoorConfig.JWTSECRET` in our case.
-
-#### `CasdoorClaims CasdoorUserToken.ParseJwtToken(FragmentActivity activity, String token)`
-
-As mentioned above, in our case, the user's personal information is underlying of the JWT, to make it easier to use token get user info, casdoor android sdk provides this method to parse token to claim. 
-
-> Using [JJWT](https://github.com/jwtk/jjwt) could easily do all operations of JSON Web Token for Java and Android, actually, this method is based on this, thus, it is 100% compatible to use JJWT instead of this method when you have some advanced customization operations of JWT. You could refer to the below code fragment when you want to customize your JWT parser:
->
-> ```java
-> Claims claims = Jwts.parserBuilder().setSigningKey(Keys.hmacShaKeyFor(CasdoorConfig.GetConfig(activity).JWTSecret.getBytes())).build().parseClaimsJws(token).getBody();
-> ```
-
-After successfully obtaining the `CasdoorClaims`, you could use all kinds of `get` method to get instance variables of claims:
-
-- `String getOrganization()`
-
-- `String getUserName()`
-- `String getType()`
-
-- `String getName()`
-
-- `String getAvatar()`
-
-- `String getEmail()`
-
-- `String getPhone()`
-
-- `String getAffiliation()`
-
-- `String getTag()`
-- `String getLanguage()`
-
-- `int getScore()`
-
-- `boolean isAdmin()`
-
-- `String getAud()`
-
-- `int getExp()`
-
-- `int getIat()`
-
-- `String getIss()`
-- `int getNbf()`
-
-- `String getSub()`
-
-To achieve get user's information effect when have logged in, you could refer to the below code fragment in `onCreateView` method of :
-
-```java
-public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-    binding = FragmentUserInfoBinding.inflate(inflater, container, false);
-    View root = binding.getRoot();
-
-    String userToken = CasdoorUserToken.GetUserToken(getActivity());
-    CasdoorClaims casdoorClaims = CasdoorUserToken.ParseJwtToken(getActivity(), userToken);
-
-    TextView name = binding.UserInfoTableName;
-    name.setText(casdoorClaims.getName());
-
-    TextView email = binding.UserInfoTableEmail;
-    email.setText(casdoorClaims.getEmail());
-
-    TextView phone = binding.UserInfoTablePhone;
-    phone.setText(casdoorClaims.getPhone());
-
-    TextView organization = binding.UserInfoTableOrganization;
-    organization.setText(casdoorClaims.getOrganization());
-}
-```
-
-
-
+[Apache-2.0](LICENSE)
