@@ -1,5 +1,13 @@
 # Casdoor Android SDK
 
+> [!WARNING]
+> **This repository is deprecated and no longer maintained.** Please use the new SDK instead: https://github.com/casdoor/casdoor-android-sdk
+>
+> - It is published to Maven Central as `org.casbin:casdoor-android-sdk`, see its README for usage from both Kotlin and Java.
+> - It signs in with PKCE, so the app does not need a client secret. This old SDK puts the client secret and JWT secret into the app, where anyone can extract them from the APK.
+>
+> Example app: https://github.com/casdoor/casdoor-android-example
+
 [Casdoor](https://casdoor.org/docs/overview) is a UI-first centralized authentication / [Single-Sign-On (SSO)](https://en.wikipedia.org/wiki/Single_sign-on) platform based on OAuth 2.0 / OIDC.
 
 Casdoor serves both the web UI and the login requests from the application users.
